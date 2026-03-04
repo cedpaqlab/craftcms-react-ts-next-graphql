@@ -12,7 +12,7 @@ export default function ProjetPage() {
         Projet et objectifs qualité
       </h1>
       <p className="projet__intro">
-        Ce que nous avons mis en place : stack, structure, décisions techniques et points à valoriser en entrevue.
+        Mis en place : stack, structure, décisions techniques.
       </p>
 
       <section className="projet__section" aria-labelledby="stack-title">
@@ -49,23 +49,10 @@ export default function ProjetPage() {
         </p>
       </section>
 
-      <section className="projet__section" aria-labelledby="qualite-title">
-        <h2 id="qualite-title">Objectifs qualité atteints</h2>
-        <ul className="projet__list">
-          <li><strong>Pas de fallback masquant les erreurs</strong> – Aucun try/catch qui transforme une erreur GraphQL ou auth en 404 ou liste vide. Les erreurs remontent et restent visibles.</li>
-          <li><strong>Config production</strong> – En prod, <code>JWT_SECRET</code> et <code>REVALIDATE_SECRET</code> doivent être définis ; utiliser les valeurs par défaut déclenche une erreur au démarrage.</li>
-          <li><strong>Auth cohérente</strong> – JWT vérifié en Edge (middleware, lib jose) et en SSR (dashboard). Cookie supprimé si token invalide. Une seule source pour le secret (<code>lib/config</code>).</li>
-          <li><strong>Sanitization du HTML</strong> – Le body des articles (Craft) est affiché via <code>dangerouslySetInnerHTML</code>. Nous passons par <code>sanitizeBody()</code> (isomorphic-dompurify) avec liste de tags et attributs autorisés. Defense in depth : même si Craft filtre à la saisie, l’output côté Next est nettoyé (évite XSS).</li>
-          <li><strong>Helpers centralisés</strong> – Auth (<code>hasAuthSession</code>, <code>getAuthToken</code>) et formatage dates (fr-FR) dans <code>lib/helpers.ts</code>. Pas de duplication, un seul endroit à faire évoluer.</li>
-          <li><strong>BFF et revalidation</strong> – Proxy GraphQL (<code>/api/cms/graphql</code>) avec en-têtes cache ; endpoint de revalidation ISR (<code>/api/revalidate</code>) pour webhook Craft. Dashboard avec tuiles ops (session, CMS, revalidation).</li>
-        </ul>
-      </section>
-
       <section className="projet__section" aria-labelledby="entrevue-title">
-        <h2 id="entrevue-title">À dire en entrevue</h2>
+        <h2 id="entrevue-title">À noter</h2>
         <ul className="projet__list">
           <li>Architecture en couches (domain / services / repositories) et flux de données sans fuite de responsabilités.</li>
-          <li>Choix de ne jamais masquer les erreurs (pas de fallback silencieux) pour faciliter le debug et la fiabilité.</li>
           <li>Auth : JWT en cookie httpOnly, vérification en Edge (middleware) et en SSR (dashboard), suppression du cookie si token invalide.</li>
           <li>Sanitization systématique du HTML issu du CMS avant affichage (DOMPurify, liste de tags autorisés) en plus des contrôles côté Craft.</li>
           <li>Config : validation en production pour les secrets, une seule source de vérité (middleware et app utilisent <code>config</code>).</li>

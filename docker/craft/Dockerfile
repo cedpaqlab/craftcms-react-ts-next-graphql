@@ -26,18 +26,15 @@ RUN apt-get update \
 # Installation de Composer depuis l'image officielle
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www/html
+# Bootstrap Craft dans un répertoire de seed (copié vers volume au 1er démarrage)
+WORKDIR /tmp
+RUN composer create-project craftcms/craft craft-app --no-interaction --no-ansi --no-progress --prefer-dist \
+  && rm -f craft-app/.env
 
-# Bootstrap du projet Craft CMS dans l'image (environnement de démo)
-RUN composer create-project craftcms/craft . --no-interaction --no-ansi --no-progress --prefer-dist \
-  && rm -f .env
+WORKDIR /var/www/html
 
 # DocumentRoot Apache sur le dossier web de Craft
 RUN sed -i 's#/var/www/html#/var/www/html/web#' /etc/apache2/sites-available/000-default.conf
-
-# Droits écriture pour le serveur web (config, storage, cpresources)
-RUN chown -R www-data:www-data /var/www/html/config /var/www/html/storage /var/www/html/web/cpresources 2>/dev/null || true \
-  && mkdir -p /var/www/html/web/cpresources && chown -R www-data:www-data /var/www/html/web/cpresources
 
 COPY docker/craft/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

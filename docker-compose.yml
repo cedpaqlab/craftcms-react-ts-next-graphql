@@ -26,6 +26,8 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+    volumes:
+      - craft_app_data:/var/www/html
     environment:
       CRAFT_ENVIRONMENT: dev
       DB_DRIVER: mysql
@@ -45,4 +47,5 @@ services:
 
 volumes:
   db_data:
+  craft_app_data:
 

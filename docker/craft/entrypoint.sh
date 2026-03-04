@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+# Premier démarrage : seed du volume avec l'app Craft (rend /var/www/html inscriptible et persistant)
+if [ ! -f /var/www/html/composer.json ]; then
+  echo "Initialisation du volume Craft..."
+  cp -a /tmp/craft-app/. /var/www/html/
+fi
+
 cd /var/www/html
 
 # Attendre que MySQL soit prêt
@@ -43,7 +49,8 @@ if ! php craft install/check 2>/dev/null; then
     --language="${CRAFT_LANGUAGE:-en-US}"
 fi
 
-# Droits écriture pour Apache (www-data)
-chown -R www-data:www-data /var/www/html/config /var/www/html/storage /var/www/html/web/cpresources 2>/dev/null || true
+# Droits écriture pour Apache et pour composer/plugin (persistance volume)
+chown -R www-data:www-data /var/www/html
+mkdir -p /var/www/html/web/cpresources && chown -R www-data:www-data /var/www/html/web/cpresources
 
 exec apache2-foreground
