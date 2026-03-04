@@ -1,4 +1,6 @@
 import { craftGraphqlFetch } from "@/lib/graphqlClient";
+import { normalizeEntries, type CraftEntriesPayload } from "@/lib/graphql/entries";
+import { config } from "@/lib/config";
 import type { Article } from "@/domain/article/article.types";
 
 type CraftEntry = {
@@ -10,11 +12,11 @@ type CraftEntry = {
   body?: string;
 };
 
-type CraftEntriesPayload = { entries?: CraftEntry[] };
+const { sections, articlesEntryType } = config.craft;
 
 const ARTICLES_LIST_QUERY = `
   query ArticlesList($limit: Int!, $offset: Int!) {
-    entries(section: "articles", limit: $limit, offset: $offset, orderBy: "postDate DESC") {
+    entries(section: "${sections.articles}", limit: $limit, offset: $offset, orderBy: "postDate DESC") {
       id
       title
       slug
@@ -23,17 +25,14 @@ const ARTICLES_LIST_QUERY = `
   }
 `;
 
-const CRAFT_ARTICLES_ENTRY_TYPE =
-  process.env.CRAFT_ARTICLES_ENTRY_TYPE ?? "article_Entry";
-
 const ARTICLE_BY_SLUG_QUERY = `
   query ArticleBySlug($slug: [String]) {
-    entries(section: "articles", slug: $slug, limit: 1) {
+    entries(section: "${sections.articles}", slug: $slug, limit: 1) {
       id
       title
       slug
       postDate
-      ... on ${CRAFT_ARTICLES_ENTRY_TYPE} {
+      ... on ${articlesEntryType} {
         excerpt
         body
       }
@@ -52,15 +51,6 @@ function toArticle(e: CraftEntry): Article {
   };
 }
 
-function normalizeEntries(data: CraftEntriesPayload | unknown): CraftEntry[] {
-  if (Array.isArray(data)) return [];
-  if (data && typeof data === "object" && "entries" in data) {
-    const entries = (data as CraftEntriesPayload).entries;
-    return Array.isArray(entries) ? entries : [];
-  }
-  return [];
-}
-
 export async function fetchArticles(
   page: number,
   perPage: number
@@ -68,12 +58,12 @@ export async function fetchArticles(
   const offset = (page - 1) * perPage;
   const limit = perPage + 1;
 
-  const data = await craftGraphqlFetch<CraftEntriesPayload>({
+  const data = await craftGraphqlFetch<CraftEntriesPayload<CraftEntry>>({
     query: ARTICLES_LIST_QUERY,
     variables: { limit, offset },
   });
 
-  const entries = normalizeEntries(data);
+  const entries = normalizeEntries<CraftEntry>(data);
   const items = entries.slice(0, perPage).map(toArticle);
   const hasMore = entries.length > perPage;
 
@@ -81,12 +71,12 @@ export async function fetchArticles(
 }
 
 export async function fetchArticleBySlug(slug: string): Promise<Article | null> {
-  const data = await craftGraphqlFetch<CraftEntriesPayload>({
+  const data = await craftGraphqlFetch<CraftEntriesPayload<CraftEntry>>({
     query: ARTICLE_BY_SLUG_QUERY,
     variables: { slug: [slug] },
   });
 
-  const entries = normalizeEntries(data);
+  const entries = normalizeEntries<CraftEntry>(data);
   const entry = entries[0];
   return entry ? toArticle(entry) : null;
 }

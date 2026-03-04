@@ -24,7 +24,15 @@ Projet fullstack dans un seul repo : Craft CMS (Docker) + Next.js (App Router), 
 | Accès | URL | Identifiant | Mot de passe |
 |-------|-----|-------------|--------------|
 | **Craft CMS (admin)** | `http://localhost:8080/admin` | admin | Demo123! |
-| **Next.js (login)** | `http://localhost:3000/login` | demo@demo.com | demo |
+| **Next.js (login)** | `http://localhost:3000/login` | voir tableau par rôle ci-dessous | demo |
+
+**Comptes Next.js par rôle** (mot de passe commun : `demo`) :
+
+| Rôle | Email | Accès |
+|------|-------|-------|
+| user | demo@demo.com | Dashboard, pas de modération |
+| moderator | moderator@demo.com | Dashboard + `/dashboard/moderation` (commentaires) |
+| admin | admin@demo.com | Idem moderator |
 
 Ports (8080, 3000) modifiables selon Docker et le lancement Next.js.
 
@@ -119,6 +127,8 @@ services/              # Façade (article, auth)
 ```
 
 Flux : **Page** -> **Service** -> **Use case** -> **Repository** -> **GraphQL** -> Craft.
+
+**Rôle du UseCase (Clean / DDD-lite)** : point d’entrée du domaine, frontière entre applicatif (service) et infrastructure (repository). Même vide, il définit le contrat métier. Ne pas le supprimer pour « simplifier » : Service -> Repository couplerait l’applicatif à l’infra et perdrait cette frontière. Les règles métier futures (validation, orchestration) vivent dans le use case.
 
 ---
 

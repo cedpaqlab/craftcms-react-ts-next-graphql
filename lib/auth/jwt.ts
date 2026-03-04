@@ -3,7 +3,7 @@ import { config } from "@/lib/config";
 
 const SECRET = config.auth.jwtSecret;
 
-export type AuthPayload = { sub: string; email: string };
+export type AuthPayload = { sub: string; email: string; role?: string; craftUserId?: string };
 export type AuthClaims = AuthPayload & jwt.JwtPayload;
 
 export function signAuthToken(payload: AuthPayload): string {

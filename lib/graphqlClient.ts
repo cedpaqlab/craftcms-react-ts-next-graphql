@@ -40,5 +40,9 @@ export async function craftGraphqlFetch<T, V = Record<string, unknown>>(
     );
   }
 
+  if (config.env.isDev && (json.data === null || Array.isArray(json.data))) {
+    console.error("[craftGraphqlFetch] réponse inattendue (data null ou array):", JSON.stringify(json, null, 2));
+  }
+
   return json.data as T;
 }

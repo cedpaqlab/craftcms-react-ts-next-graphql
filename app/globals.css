@@ -291,6 +291,141 @@ body {
   text-decoration: underline;
 }
 
+.article-detail__comments {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.article-detail__comments-title {
+  margin: 0 0 var(--space);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.comment-list {
+  list-style: none;
+  margin: 0 0 var(--space);
+  padding: 0;
+  display: grid;
+  gap: var(--space);
+}
+
+.comment-list__empty {
+  color: var(--text-muted);
+  margin: 0 0 var(--space);
+  font-size: 0.9375rem;
+}
+
+.comment-card {
+  padding: var(--space);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.comment-card__meta {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.comment-card__author {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.comment-card__date {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.comment-card__body {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.comment-card__body p {
+  margin: 0 0 0.5rem;
+}
+
+.comment-card__body p:last-child {
+  margin-bottom: 0;
+}
+
+.comment-form {
+  display: grid;
+  gap: var(--space);
+  max-width: 32rem;
+}
+
+.comment-form__flash {
+  margin: 0 0 var(--space);
+  padding: 0.75rem;
+  border-radius: var(--radius);
+  font-size: 0.9375rem;
+}
+
+.comment-form__flash--ok {
+  background: rgba(46, 160, 67, 0.15);
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.3);
+}
+
+.comment-form__flash--error {
+  background: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.3);
+}
+
+.comment-form__field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.comment-form__field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.comment-form__input {
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.comment-form__input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.comment-form__textarea {
+  resize: vertical;
+  min-height: 6rem;
+}
+
+.comment-form__submit {
+  padding: 0.75rem 1.25rem;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  justify-self: start;
+}
+
+.comment-form__submit:hover {
+  background: var(--accent-hover);
+}
+
 .blog-pagination {
   margin-top: 1.5rem;
 }
