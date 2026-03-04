@@ -2,6 +2,8 @@
 
 Projet fullstack dans un seul repo : Craft CMS (Docker) + Next.js (App Router), GraphQL, auth JWT, ISR, BFF, sanitization HTML. Architecture domain / services / repositories.
 
+![Screenshot](Screenshot.png)
+
 ---
 
 ## Stack
