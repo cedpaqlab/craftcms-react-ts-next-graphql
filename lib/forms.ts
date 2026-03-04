@@ -1,11 +1,12 @@
 import type { CreateCommentFormInput } from "@/domain/comment/comment.types";
 
+/* Appelé par: parseCommentFormData (local).
+   Appelle: — */
 const trim = (v: FormDataEntryValue | null): string =>
   String(v ?? "").trim();
 
-/**
- * Parse FormData du formulaire commentaire. craftAuthorId est injecté côté action (session).
- */
+/* Appelé par: submitCommentAction (route, actions.ts).
+   Appelle: trim (local). */
 export function parseCommentFormData(formData: FormData): {
   input: CreateCommentFormInput;
   articleSlug: string;

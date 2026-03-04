@@ -1,6 +1,8 @@
 const isProd = process.env.NODE_ENV === "production";
 const isDev = process.env.NODE_ENV === "development";
 
+/* Appelé par: config (local, au chargement).
+   Appelle: process.env. */
 function env(key: string, fallback: string): string {
   const value = process.env[key] ?? fallback;
   if (isProd && (key === "JWT_SECRET" || key === "REVALIDATE_SECRET") && value === fallback) {
@@ -9,10 +11,14 @@ function env(key: string, fallback: string): string {
   return value;
 }
 
+/* Appelé par: config (local, au chargement).
+   Appelle: — */
 function optEnv(key: string, fallback: string): string {
   return process.env[key] ?? fallback;
 }
 
+/* Appelé par: graphqlClient, repositories, auth, routes, middleware, actions (lib/route).
+   Appelle: env (local), optEnv (local). */
 export const config = {
   env: { isDev, isProd },
   craft: {

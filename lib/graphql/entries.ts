@@ -4,10 +4,9 @@
  */
 export type CraftEntriesPayload<T> = { entries?: T[] };
 
-/**
- * Extrait le tableau `entries` d'une réponse Craft GraphQL (queries entries).
- * Une seule implémentation pour tous les repositories (DRY).
- */
+/* Appelé par: commentRepository, articleRepository (repository).
+   Appelle: —.
+   Plus d'info: extrait entries d'une réponse Craft; une implémentation pour tous les repos (DRY). */
 export function normalizeEntries<T>(data: unknown): T[] {
   if (data == null || typeof data !== "object") return [];
   if (Array.isArray(data)) return [];

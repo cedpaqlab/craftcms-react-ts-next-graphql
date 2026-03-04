@@ -14,6 +14,9 @@ type Payload =
   | { users?: CraftUser[] }
   | { users?: { nodes?: CraftUser[]; edges?: Array<{ node?: CraftUser }> } };
 
+/* Appelé par: fetchCraftUserIdByEmail (repository).
+   Appelle: —.
+   Plus d'info: normalise liste users (directe ou nodes/edges selon schéma Craft). */
 function toUserList(users: Payload["users"]): CraftUser[] {
   if (!users) return [];
   if (Array.isArray(users)) return users;
@@ -23,11 +26,9 @@ function toUserList(users: Payload["users"]): CraftUser[] {
   return [];
 }
 
-/**
- * Résout l’ID utilisateur Craft à partir de l’email (session).
- * Requête GraphQL Craft : lecture users (id, email), filtre côté app.
- * Gère liste directe ou connexion (nodes/edges). Pour gros volumes : query Craft dédiée (ex. userByEmail).
- */
+/* Appelé par: POST /api/auth/login (route).
+   Appelle: craftGraphqlFetch (lib), toUserList (local).
+   Plus d'info: filtre côté app par email; pour gros volumes préférer une query Craft dédiée (ex. userByEmail). */
 export async function fetchCraftUserIdByEmail(email: string): Promise<string> {
   const normalized = email.trim().toLowerCase();
   if (!normalized) throw new Error("Email requis pour résoudre l’utilisateur Craft.");

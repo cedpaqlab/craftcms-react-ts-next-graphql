@@ -7,6 +7,8 @@ import { config } from "@/lib/config";
 import { getAuthToken } from "@/lib/helpers";
 import { validateToken } from "@/services/authService";
 
+/* Appelé par: page blog/[slug] (route, formulaire commentaire).
+   Appelle: parseCommentFormData (lib), getAuthToken (lib), validateToken (service), submitComment (service), config (lib), redirect (Next). */
 export async function submitCommentAction(formData: FormData) {
   const { input: parsed, articleSlug } = parseCommentFormData(formData);
   const baseSlug = articleSlug || "blog";

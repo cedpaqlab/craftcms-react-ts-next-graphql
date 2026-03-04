@@ -11,14 +11,20 @@ const cookieOptions = {
   maxAge: 60 * 60 * 24 * 7,
 };
 
+/* Appelé par: POST /api/auth/login (route).
+   Appelle: NextResponse.cookies (Next). */
 export function setAuthCookie(response: NextResponse, token: string): void {
   response.cookies.set(AUTH_COOKIE, token, cookieOptions);
 }
 
+/* Appelé par: POST /api/auth/logout (route).
+   Appelle: NextResponse.cookies (Next). */
 export function clearAuthCookie(response: NextResponse): void {
   response.cookies.set(AUTH_COOKIE, "", { ...cookieOptions, maxAge: 0 });
 }
 
+/* Appelé par: middleware ou routes (route).
+   Appelle: — */
 export function getAuthTokenFromRequest(request: NextRequest): string | undefined {
   return request.cookies.get(AUTH_COOKIE)?.value;
 }

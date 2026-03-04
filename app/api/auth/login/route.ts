@@ -8,6 +8,8 @@ import { setAuthCookie } from "@/lib/auth/cookies";
 import { config } from "@/lib/config";
 import { fetchCraftUserIdByEmail } from "@/repositories/craftUserRepository";
 
+/* Appelé par: client (route API POST /api/auth/login).
+   Appelle: authenticateUser (service), fetchCraftUserIdByEmail (repository), createTokenForUser (service), setAuthCookie (lib). */
 export async function POST(request: NextRequest) {
   let body: { email?: string; password?: string };
   try {

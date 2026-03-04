@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { craftGraphqlFetch } from "@/lib/graphqlClient";
 
+/* Appelé par: client (route API POST /api/cms/graphql).
+   Appelle: craftGraphqlFetch (lib). */
 export async function POST(request: NextRequest) {
   let body: { query?: string; variables?: Record<string, unknown> };
   try {

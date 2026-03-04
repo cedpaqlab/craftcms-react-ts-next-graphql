@@ -69,11 +69,16 @@ const PENDING_COMMENTS_QUERY = `
   }
 `;
 
+/* Appelé par: toComment (local).
+   Appelle: — */
 function parseStatus(s: string | undefined): CommentStatus {
   if (s === "approved" || s === "rejected" || s === "pending") return s;
   return "pending";
 }
 
+/* Appelé par: fetchCommentsByArticle, fetchPendingComments, createComment, updateCommentStatus (repository).
+   Appelle: parseStatus (local).
+   Plus d'info: mappe entrée Craft vers type domaine Comment. */
 function toComment(e: CraftCommentEntry): Comment {
   const article = Array.isArray(e.article) ? e.article[0] : e.article;
   return {
@@ -88,6 +93,8 @@ function toComment(e: CraftCommentEntry): Comment {
   };
 }
 
+/* Appelé par: listCommentsForArticleUseCase (use case).
+   Appelle: craftGraphqlFetch (lib), normalizeEntries (lib), toComment (local). */
 export async function fetchCommentsByArticle(
   articleId: string,
   limit: number = 50
@@ -102,6 +109,8 @@ export async function fetchCommentsByArticle(
     .filter((c) => c.status === "approved");
 }
 
+/* Appelé par: listPendingForModerationUseCase (use case).
+   Appelle: craftGraphqlFetch (lib), normalizeEntries (lib), parseStatus (local), toComment (local). */
 export async function fetchPendingComments(limit: number = 100): Promise<Comment[]> {
   const data = await craftGraphqlFetch<CraftEntriesPayload<CraftCommentEntry>>({
     query: PENDING_COMMENTS_QUERY,
@@ -113,6 +122,9 @@ export async function fetchPendingComments(limit: number = 100): Promise<Comment
     .map(toComment);
 }
 
+/* Appelé par: createComment, updateCommentStatus (repository).
+   Appelle: —.
+   Plus d'info: extrait l'entrée renvoyée par la mutation Craft (clé dynamique). */
 function getSavedEntry<T extends CraftCommentEntry>(
   res: unknown,
   mutationName: string
@@ -131,6 +143,8 @@ function getSavedEntry<T extends CraftCommentEntry>(
   return found ?? null;
 }
 
+/* Appelé par: createComment (repository).
+   Appelle: config (lib). */
 function throwCommentSaveError(res: unknown, mutationName: string): never {
   const { isDev } = config.env;
   const keys = typeof res === "object" && res !== null ? Object.keys(res).join(", ") || "(aucune)" : "(aucune)";
@@ -141,6 +155,8 @@ function throwCommentSaveError(res: unknown, mutationName: string): never {
   throw new Error(msg);
 }
 
+/* Appelé par: submitCommentUseCase (use case).
+   Appelle: craftGraphqlFetch (lib), getSavedEntry (local), throwCommentSaveError (local), toComment (local). */
 export async function createComment(input: CreateCommentInput): Promise<Comment> {
   const title = `Comment by ${input.authorName}`.slice(0, 255);
   const query = `
@@ -184,6 +200,8 @@ ${COMMENT_RESPONSE_FIELDS}
   return toComment(saved);
 }
 
+/* Appelé par: setCommentStatusUseCase (use case).
+   Appelle: craftGraphqlFetch (lib), getSavedEntry (local), toComment (local). */
 export async function updateCommentStatus(
   id: string,
   status: CommentStatus

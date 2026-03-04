@@ -5,6 +5,8 @@ type GraphQLOptions<V = Record<string, unknown>> = {
   variables?: V;
 };
 
+/* Appelé par: repositories (comment, article, craftUser), route POST /api/cms/graphql (route).
+   Appelle: config (lib), fetch (runtime). */
 export async function craftGraphqlFetch<T, V = Record<string, unknown>>(
   options: GraphQLOptions<V>
 ): Promise<T> {

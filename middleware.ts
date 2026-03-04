@@ -5,6 +5,8 @@ import { config as appConfig } from "@/lib/config";
 
 const AUTH_COOKIE = "auth";
 
+/* Appelé par: middleware (local).
+   Appelle: NextResponse.redirect (Next). */
 function redirectToLogin(request: NextRequest) {
   const from = request.nextUrl.pathname;
   const loginUrl = new URL("/login", request.url);
@@ -12,6 +14,8 @@ function redirectToLogin(request: NextRequest) {
   return NextResponse.redirect(loginUrl);
 }
 
+/* Appelé par: Next.js (Edge, avant chaque requête matcher /dashboard/*).
+   Appelle: redirectToLogin (local), jwtVerify (lib jose), appConfig (lib). */
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get(AUTH_COOKIE)?.value;
   if (!token) {

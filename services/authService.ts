@@ -8,6 +8,8 @@ const DEMO_USERS: Array<{ email: string; password: string; id: string; role: str
   { email: "admin@demo.com", password: "demo", id: "admin", role: "admin" },
 ];
 
+/* Appelé par: POST /api/auth/login (route).
+   Appelle: — (lecture DEMO_USERS en mémoire). */
 export async function authenticateUser(
   email: string,
   password: string
@@ -18,10 +20,14 @@ export async function authenticateUser(
   return u ? { id: u.id, email: u.email, role: u.role } : null;
 }
 
+/* Appelé par: submitCommentAction (route), composants (lecture claims).
+   Appelle: verifyAuthToken (lib). */
 export function validateToken(token: string): AuthClaims | null {
   return verifyAuthToken(token);
 }
 
+/* Appelé par: POST /api/auth/login (route).
+   Appelle: signAuthToken (lib). */
 export function createTokenForUser(user: AuthUser, craftUserId: string): string {
   return signAuthToken({
     sub: user.id,
@@ -31,6 +37,8 @@ export function createTokenForUser(user: AuthUser, craftUserId: string): string 
   });
 }
 
+/* Appelé par: page dashboard/moderation, composants (route).
+   Appelle: — */
 export function canModerate(claims: AuthClaims): boolean {
   return claims.role === "moderator" || claims.role === "admin";
 }

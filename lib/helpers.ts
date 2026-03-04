@@ -5,18 +5,20 @@
 
 import { cookies } from "next/headers";
 
-/** --- Auth (server: layout, pages) --- */
-
+/* Appelé par: layout, pages (route).
+   Appelle: cookies (Next). */
 export function hasAuthSession(): boolean {
   return cookies().get("auth")?.value != null;
 }
 
+/* Appelé par: submitCommentAction (route).
+   Appelle: cookies (Next). */
 export function getAuthToken(): string | undefined {
   return cookies().get("auth")?.value;
 }
 
-/** --- Dates (fr-FR) --- */
-
+/* Appelé par: composants affichage (route).
+   Appelle: — */
 export function formatDateFr(value: Date | string | null | undefined): string {
   if (value == null) return "—";
   const d = typeof value === "string" ? new Date(value) : value;
@@ -27,6 +29,8 @@ export function formatDateFr(value: Date | string | null | undefined): string {
   });
 }
 
+/* Appelé par: composants affichage (route).
+   Appelle: — */
 export function formatDateTimeFr(value: Date | string | number | null | undefined): string {
   if (value == null) return "—";
   const d = typeof value === "number" ? new Date(value * 1000) : typeof value === "string" ? new Date(value) : value;

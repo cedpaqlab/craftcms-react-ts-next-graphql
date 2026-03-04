@@ -40,6 +40,9 @@ const ARTICLE_BY_SLUG_QUERY = `
   }
 `;
 
+/* Appelé par: fetchArticles, fetchArticleBySlug (repository).
+   Appelle: —.
+   Plus d'info: mappe entrée Craft vers type domaine Article. */
 function toArticle(e: CraftEntry): Article {
   return {
     id: e.id,
@@ -51,6 +54,8 @@ function toArticle(e: CraftEntry): Article {
   };
 }
 
+/* Appelé par: listArticlesUseCase (use case).
+   Appelle: craftGraphqlFetch (lib), normalizeEntries (lib), toArticle (local). */
 export async function fetchArticles(
   page: number,
   perPage: number
@@ -70,6 +75,8 @@ export async function fetchArticles(
   return { items, hasMore };
 }
 
+/* Appelé par: getArticleUseCase (use case).
+   Appelle: craftGraphqlFetch (lib), normalizeEntries (lib), toArticle (local). */
 export async function fetchArticleBySlug(slug: string): Promise<Article | null> {
   const data = await craftGraphqlFetch<CraftEntriesPayload<CraftEntry>>({
     query: ARTICLE_BY_SLUG_QUERY,

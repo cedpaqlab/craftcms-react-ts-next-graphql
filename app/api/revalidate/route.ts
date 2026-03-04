@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 import { revalidatePath } from "next/cache";
 import { config } from "@/lib/config";
 
+/* Appelé par: client externe ou webhook (route API GET /api/revalidate).
+   Appelle: config (lib), revalidatePath (Next). */
 export async function GET(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get("secret");
   if (secret !== config.revalidate.secret) {
@@ -16,6 +18,8 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ revalidated: true });
 }
 
+/* Appelé par: client externe ou webhook (route API POST /api/revalidate).
+   Appelle: config (lib), revalidatePath (Next). */
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const secret = body.secret ?? request.nextUrl.searchParams.get("secret");
