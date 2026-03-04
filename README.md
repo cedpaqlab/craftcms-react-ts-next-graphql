@@ -1,6 +1,6 @@
 # Next.js + Craft CMS headless
 
-Projet complet et fonctionnel dans un seul repo : Craft CMS (Docker) + Next.js (App Router) consommant l’API GraphQL Craft, avec authentification JWT, pages publiques en ISR et zone protégée en SSR. Architecture maintenable (domain / services / repositories).
+Projet fullstack dans un seul repo : Craft CMS (Docker) + Next.js (App Router), GraphQL, auth JWT, ISR, BFF, sanitization HTML. Architecture domain / services / repositories.
 
 ---
 
@@ -8,23 +8,23 @@ Projet complet et fonctionnel dans un seul repo : Craft CMS (Docker) + Next.js (
 
 | Couche | Technologie |
 |--------|-------------|
-| CMS | Craft CMS 4+ (Docker, MySQL) |
-| Front | Next.js 14+ (App Router), React, TypeScript |
-| Data | GraphQL (Craft) |
-| Auth | JWT, cookies httpOnly, middleware Next.js |
-| Styles | CSS natif (grille), sans framework |
-| Outils | Docker, Node.js 18+ LTS, npm ou pnpm |
+| CMS | Craft CMS (Docker, MySQL) |
+| Front | Next.js 14 (App Router), React, TypeScript |
+| Data | GraphQL (Craft), client dédié, fragments |
+| Auth | JWT (jose en Edge + jsonwebtoken), cookie httpOnly, middleware |
+| Styles | CSS natif (grid), sans framework |
+| Outils | Docker, Node.js 18+, npm ou pnpm |
 
 ---
 
-## Accès (identifiants)
+## Accès (identifiants démo)
 
 | Accès | URL | Identifiant | Mot de passe |
 |-------|-----|-------------|--------------|
 | **Craft CMS (admin)** | `http://localhost:8080/admin` | admin | Demo123! |
-| **Front Next.js (compte démo)** | `http://localhost:3000/login` | demo@demo.com | demo |
+| **Next.js (login)** | `http://localhost:3000/login` | demo@demo.com | demo |
 
-Les ports (8080, 3000) peuvent varier selon la config Docker et le lancement de Next.js.
+Ports (8080, 3000) modifiables selon Docker et le lancement Next.js.
 
 ---
 
@@ -44,11 +44,11 @@ Les ports (8080, 3000) peuvent varier selon la config Docker et le lancement de 
 docker compose up -d
 ```
 
-Après la première installation Craft (voir ROADMAP Phase 0). Craft s'installe auto au premier run (admin / Demo123!). Puis dans l'admin : GraphQL, schéma, token API, section Articles. Récupérer l’URL GraphQL et le token API dans l’admin Craft, puis les renseigner dans `.env.local`.
+Craft s'installe auto au premier run (admin / Demo123!). Dans l'admin : GraphQL, schéma, token API, section Articles. Récupérer l’URL GraphQL et le token API dans l’admin Craft, puis les renseigner dans `.env.local`.
 
 **2. Variables d’environnement Next.js**
 
-Créer `.env.local` avec `CRAFT_GRAPHQL_ENDPOINT` (ex. `http://localhost:8080/graphql`), `CRAFT_GRAPHQL_TOKEN`, `JWT_SECRET`, `REVALIDATE_SECRET`.
+Créer `.env.local` avec `CRAFT_GRAPHQL_ENDPOINT` (ex. `http://localhost:8080/index.php?action=graphql/api`), `CRAFT_GRAPHQL_TOKEN`, `JWT_SECRET`, `REVALIDATE_SECRET`.
 
 **3. Installer et lancer Next.js**
 
@@ -77,12 +77,12 @@ Créer `.env.local` à la racine (voir `.env.example` pour le modèle). Variable
 
 | Variable | Description | Exemple (dev) |
 |----------|-------------|----------------|
-| `CRAFT_GRAPHQL_ENDPOINT` | URL de l'API GraphQL Craft (Docker : ex. `http://localhost:8080/graphql`) | `http://localhost:8080/graphql` |
-| `CRAFT_GRAPHQL_TOKEN` | Token Bearer pour l'API Craft | (token généré dans Craft) |
-| `JWT_SECRET` | Secret pour signer/vérifier les JWT | chaîne longue et aléatoire |
-| `REVALIDATE_SECRET` | Secret pour l'endpoint de revalidation ISR (webhook) | chaîne longue et aléatoire |
+| `CRAFT_GRAPHQL_ENDPOINT` | URL GraphQL Craft | `http://localhost:8080/index.php?action=graphql/api` |
+| `CRAFT_GRAPHQL_TOKEN` | Token Bearer Craft | (token dans l'admin Craft) |
+| `JWT_SECRET` | Secret JWT | chaîne aléatoire ; **obligatoire en prod** (pas de défaut) |
+| `REVALIDATE_SECRET` | Secret webhook revalidation | chaîne aléatoire ; **obligatoire en prod** |
 
-Ne pas commiter `.env.local`. Utiliser `.env.example` comme référence sans valeurs sensibles.
+Ne pas commiter `.env.local`. Référence : `.env.example`.
 
 ---
 
@@ -100,31 +100,34 @@ Ne pas commiter `.env.local`. Utiliser `.env.example` comme référence sans val
 ## Structure du projet
 
 ```
-docker/                 # Dockerfile(s) pour Craft CMS
+docker/                 # Craft CMS (Dockerfile, entrypoint)
 docker-compose.yml     # Craft + MySQL
-app/                   # Routes et pages Next.js (App Router)
-  api/                 # API routes (auth, proxy GraphQL, revalidate)
-  blog/                # Pages publiques blog (ISR)
-  dashboard/           # Zone protégée (SSR)
+app/
+  api/                 # auth (login, logout), cms/graphql (BFF), revalidate
+  blog/                # Liste + [slug] (ISR)
+  dashboard/           # Zone protégée, tuiles ops (session, CMS, revalidation)
   login/
-components/            # Composants UI réutilisables
-domain/                # Logique métier (types, use cases)
-lib/                   # Utilitaires (config, client GraphQL, auth)
-middleware/            # Logique auth pour middleware Next.js
-repositories/          # Accès données (GraphQL, mapping)
-services/              # Orchestration (appels repositories, auth)
+  projet/
+components/            # ArticleCard, ArticleList, LoginForm, etc.
+domain/                # Types + use cases (article, user)
+lib/                   # config, graphqlClient, auth (jwt, cookies), helpers, sanitize
+middleware.ts          # Protection /dashboard, vérif JWT (Edge)
+repositories/          # GraphQL, mapping vers domain
+services/              # Façade (article, auth)
 ```
 
-Le flux de données côté lecture : **Page** -> **Service** -> **Use case / Repository** -> **Client GraphQL** -> Craft CMS.
+Flux : **Page** -> **Service** -> **Use case** -> **Repository** -> **GraphQL** -> Craft.
 
 ---
 
 ## Concepts clés
 
-- **Pages publiques (`/blog`, `/blog/[slug])** : rendu côté serveur avec ISR (`revalidate`). Pas de cookie auth requis.
-- **Dashboard (`/dashboard`)** : protégé par middleware (cookie JWT) et vérification côté serveur ; rendu SSR.
-- **Auth** : login via `POST /api/auth/login` ; JWT stocké en cookie httpOnly ; logout via `POST /api/auth/logout`. Compte démo : `demo@demo.com` / `demo`.
-- **Revalidation** : endpoint `GET/POST /api/revalidate?secret=<REVALIDATE_SECRET>` pour invalider le cache ISR (à appeler depuis un webhook Craft).
+- **Pages publiques** : `/`, `/blog`, `/blog/[slug]` (ISR). Pas de cookie requis.
+- **Auth** : login `POST /api/auth/login` ; JWT en cookie httpOnly ; logout `POST /api/auth/logout`. Compte démo : `demo@demo.com` / `demo`. Middleware vérifie le JWT en Edge (jose) ; dashboard en SSR.
+- **Dashboard** : tuiles Session, CMS (ping + derniers articles), Ops (revalidation ISR via server actions).
+- **BFF** : `POST /api/cms/graphql` proxy vers Craft avec Cache-Control. Pas d’auth sur le proxy.
+- **Sanitization** : le body HTML des articles (Craft) est passé par DOMPurify (liste de tags autorisés) avant affichage. Voir `lib/sanitize.ts`.
+- **Revalidation** : `GET/POST /api/revalidate?secret=<REVALIDATE_SECRET>` pour webhook Craft.
 
 ---
 
@@ -141,13 +144,10 @@ Pour que les mises à jour de contenu dans Craft invalident le cache Next.js :
 
 ---
 
-## Scénario démo (entrevue)
+## Points clés
 
-1. **Architecture** : montrer la séparation domain / services / repositories et le flux GraphQL -> repository -> service -> page.
-2. **Data** : ouvrir une requête GraphQL (fragments, pagination) et tracer son usage jusqu’à l’affichage.
-3. **Auth** : démontrer login -> cookie -> accès à `/dashboard`, puis logout et redirection.
-4. **Performance** : expliquer le choix ISR pour le blog, SSR pour le dashboard, et le rôle du webhook pour la revalidation.
-
----
-
-Voir `ROADMAP.md` pour le plan par phases (Phase 0 Docker Craft + MySQL, puis Next.js, data, pages, auth, BFF, polish).
+1. **Architecture** : domain / services / repositories, flux Page -> Service -> Use case -> Repository.
+2. **Data** : une requête GraphQL (repository) jusqu'à l'affichage (page).
+3. **Auth** : login -> cookie -> /dashboard ; logout ; middleware + SSR.
+4. **Qualité** : pas de fallback masquant les erreurs ; config prod (secrets obligatoires) ; sanitization HTML (DOMPurify).
+5. **Perfs** : ISR blog, webhook revalidation, BFF cache.
